@@ -1,6 +1,6 @@
 import pandas as pd
+import requests 
 import re
-import requests
 from bs4 import BeautifulSoup as bs
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -161,8 +161,8 @@ def extract_loose_adaptations():
         {"Title": "Unleashing Mr. Darcy", "Year": "2016", "Medium": "Film", "Medium Type": "Feature Film"},
         {"Title": "Orgulho e Paixão", "Year": "2018", "Medium": "Television", "Medium Type": "Soap Opera"},
         {"Title": "Marrying Mr Darcy", "Year": "2018", "Medium": "Film", "Medium Type": "Feature Film"},
-        {"Title": "Pride and Prejudice: Atlanta", "Year": "2019", "Medium": "Television" ,"Medium Type": "Movie"},
-        {"Title": "Pride and Prejudice, Cut", "Year": "2019", "Medium": "Television" , "Medium Type": "Movie"},
+        {"Title": "Pride and Prejudice: Atlanta", "Year": "2019", "Medium": "Television" ,"Medium Type": "Television Movie"},
+        {"Title": "Pride and Prejudice, Cut", "Year": "2019", "Medium": "Television" , "Medium Type": "Television Movie"},
         {"Title": "Fire Island", "Year": "2022","Medium": "Film", "Medium Type": "Feature Film"},
         {"Title": "An American in Austen", "Year": "2024", "Medium": "Film", "Medium Type": "Feature Film"},
         {"Title": 'Futurama\'s "The Day the Earth Stood Stupid"', "Year": "2001", "Medium": "Television", "Medium Type": "Episode"},
@@ -240,7 +240,7 @@ extract_theater_adaptations()
 pride_adaptations_df = pd.DataFrame(pride_adaptations)
 
 # Step 4: Display the combined DataFrame
-print(pride_adaptations_df)
+#print(pride_adaptations_df)
 
 # Initialize lists to store adaptation data for Mansfield Park
 mansfield_park_adaptations = []
@@ -682,7 +682,7 @@ extract_persuasion_loose_adaptations(soup)
 persuasion_adaptations_df = pd.DataFrame(persuasion_adaptations)
 
 # Step 4: Display the combined DataFrame
-print(persuasion_adaptations_df)
+#print(persuasion_adaptations_df)
 
 # Initialize list to store adaptation data for Sanditon
 sanditon_adaptations = []
@@ -909,9 +909,6 @@ print(all_adaptations)
 
 all_adaptations.to_csv('alladaptations.csv', index=False)
 
-# EDA
-print(all_adaptations.describe(include='all'))  # Summary statistics, including categorical data
-
 # Check for Missing Values
 print(all_adaptations.isnull().sum())  # Count missing values per column
 
@@ -946,11 +943,48 @@ df = df[df['Medium'] != 'Novel']
 df.loc[(df['Medium Type'] == 'Television Film') | (df['Medium Type'] == 'Television Movie'), 'Medium'] = 'Television'
 df.loc[(df['Medium Type'] == 'Television Film') | (df['Medium Type'] == 'Television Movie'), 'Medium Type'] = 'Television Movie'
 
+# Step 4.1: Inserção manual dos valores de 'Medium' e 'Medium Type' faltantes
+updates = [
+    {"Title": 'Wishbone\'s "Furst Impressions"', "Year": "1995", "Medium": "Television", "Medium Type": "Episode"},
+    {"Title": 'Red Dwarf\'s "Beyond a Joke"', "Year": "1997", "Medium": "Television", "Medium Type": "Episode"},
+    {"Title": "Bridget Jones's Diary", "Year": "2001", "Medium": "Film", "Medium Type": "Feature Film"},
+    {"Title": "Bride and Prejudice", "Year": "2004", "Medium": "Film", "Medium Type": "Feature Film"},
+    {"Title": "Pride & Prejudice: A Latter-Day Comedy", "Year": "2003", "Medium": "Film", "Medium Type": "Independent Film"},
+    {"Title": "Kahiin Toh Hoga", "Year": "2003–2007", "Medium": "Television", "Medium Type": "Soap Opera"},
+    {"Title": "Lost in Austen", "Year": "2008", "Medium": "Television", "Medium Type": "Television Series"},
+    {"Title": "What is needed for a bachelor", "Year": "2008", "Medium": "Television", "Medium Type": "Television Series"},
+    {"Title": "The Lizzie Bennet Diaries", "Year": "2012–2013", "Medium": "Web Series", "Medium Type": "Web Series"},
+    {"Title": "Austenland", "Year": "2013", "Medium": "Film", "Medium Type": "Feature Film"},
+    {"Title": "Death Comes to Pemberley", "Year": "2013", "Medium": "Television", "Medium Type": "Television Series"},
+    {"Title": "Pride and Prejudice and Zombies", "Year": "2016", "Medium": "Film", "Medium Type": "Feature Film"},
+    {"Title": "Before the Fall", "Year": "2016", "Medium": "Independent Film", "Medium Type": "Feature Film"},
+    {"Title": "Unleashing Mr. Darcy", "Year": "2016", "Medium": "Film", "Medium Type": "Feature Film"},
+    {"Title": "Orgulho e Paixão", "Year": "2018", "Medium": "Television", "Medium Type": "Soap Opera"},
+    {"Title": "Marrying Mr Darcy", "Year": "2018", "Medium": "Film", "Medium Type": "Feature Film"},
+    {"Title": "Pride and Prejudice: Atlanta", "Year": "2019", "Medium": "Television", "Medium Type": "Television Movie"},
+    {"Title": "Pride and Prejudice, Cut", "Year": "2019", "Medium": "Television", "Medium Type": "Television Movie"},
+    {"Title": "Fire Island", "Year": "2022", "Medium": "Film", "Medium Type": "Feature Film"},
+    {"Title": "An American in Austen", "Year": "2024", "Medium": "Film", "Medium Type": "Feature Film"},
+    {"Title": 'Futurama\'s "The Day the Earth Stood Stupid"', "Year": "2001", "Medium": "Television", "Medium Type": "Episode"},
+    {"Title": 'Doctor Who\'s "The Caretaker"', "Year": "2014", "Medium": "Television", "Medium Type": "Episode"},
+    {"Title": "Marrying Mr Darcy", "Year": "2014", "Medium": "Board Game", "Medium Type": "Game"}
+]
+
+# Aplicar as atualizações
+for update in updates:
+    condition = (df['Title'] == update['Title']) & (df['Year'] == update['Year'])
+    df.loc[condition, ['Medium', 'Medium Type']] = update['Medium'], update['Medium Type']
+
 # Step 5: Save the cleaned DataFrame to a new CSV file
 df.to_csv('alladaptations_cleaned.csv', index=False)
 
 print("Data cleaned and saved as alladaptations_cleaned.csv")
-print(df)
+
+# Localizar as linhas com 'Medium Type' como 'Unknown'
+unknown_medium_type = df[df['Medium Type'] == 'Unknown']
+
+# Exibir as linhas para revisão
+print(unknown_medium_type)
 
 # Agrupe os dados por 'Based On' e conte o número de adaptações
 adaptations_per_book = df.groupby('Based On')['Title'].count().reset_index()
@@ -1018,6 +1052,13 @@ plt.xticks(rotation=45)
 # Mostre o gráfico
 plt.show()
 
+import matplotlib.pyplot as plt
+import seaborn as sns
+import pandas as pd
+
+# Configuração para garantir que os gráficos fiquem visíveis
+plt.rcParams.update({'figure.autolayout': True})
+
 # Agrupe os dados por 'Based On', 'Medium', e 'Medium Type' e conte o número de adaptações
 adaptations_by_book_medium_type = df.groupby(['Based On', 'Medium', 'Medium Type'])['Title'].count().reset_index()
 
@@ -1037,7 +1078,7 @@ plt.xlabel('Obra')
 plt.ylabel('Número de Adaptações')
 
 # Ajustar rotação dos labels no eixo X para melhor visualização
-plt.xticks(rotation=45)
+plt.xticks(rotation=45, ha='right')  # Rotacionar rótulos para 45 graus e alinhar à direita
 
 # Mostrar o gráfico
 plt.show()
@@ -1053,7 +1094,7 @@ sns.barplot(x='Based On', y='Title', hue='Direct or Loose Adaptation', data=adap
 plt.title('Número de Adaptações Diretas e Livres por Obra')
 plt.xlabel('Obra')
 plt.ylabel('Número de Adaptações')
-plt.xticks(rotation=45)
+plt.xticks(rotation=45, ha='right')  # Rotacionar rótulos para 45 graus e alinhar à direita
 
 # Mostrar gráfico
 plt.show()
@@ -1061,8 +1102,6 @@ plt.show()
 # Filtrar anos válidos e converter para números
 df_filtered = df[df['Year'].apply(lambda x: x.isnumeric())]
 df_filtered.loc[:, 'Year'] = df_filtered['Year'].fillna('Unknown') 
-# OR
-# df_filtered['Year'] = df_filtered['Year'].fillna('Unknown') 
 
 # Criar o histograma
 plt.figure(figsize=(12, 6))
@@ -1072,6 +1111,9 @@ sns.histplot(df_filtered['Year'], bins=20, kde=False)
 plt.title('Distribuição de Adaptações ao Longo do Tempo')
 plt.xlabel('Ano')
 plt.ylabel('Número de Adaptações')
+
+# Ajustar rotação dos rótulos no eixo X
+plt.xticks(rotation=90)  # Rotacionar rótulos para 90 graus para os anos
 
 # Mostrar gráfico
 plt.show()
@@ -1100,6 +1142,9 @@ sns.lineplot(x='Year', y='Title', hue='Based On', data=adaptations_per_year, mar
 plt.title('Evolução das Adaptações ao Longo do Tempo por Obra')
 plt.xlabel('Ano')
 plt.ylabel('Número de Adaptações')
+
+# Ajustar rotação dos rótulos no eixo X
+plt.xticks(rotation=90)  # Rotacionar rótulos para 90 graus para os anos
 
 # Mostrar gráfico
 plt.show()
